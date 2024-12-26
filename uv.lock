@@ -556,7 +556,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "openai", specifier = "==1.58.1" },
-    { name = "openlit", specifier = "==1.33.1" },
+    { name = "openlit", specifier = ">=1.33.1" },
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "polars", specifier = ">=1.18.0" },
     { name = "python-dotenv", specifier = "==1.0.1" },
