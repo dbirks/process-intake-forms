@@ -468,9 +468,9 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "openai", specifier = "==1.58.1" },
-    { name = "openlit", specifier = ">=1.33.1" },
-    { name = "python-dotenv", specifier = ">=1.0.1" },
-    { name = "structlog", specifier = ">=24.4.0" },
+    { name = "openlit", specifier = "==1.33.1" },
+    { name = "python-dotenv", specifier = "==1.0.1" },
+    { name = "structlog", specifier = "==24.4.0" },
 ]
 
 [[package]]
