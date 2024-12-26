@@ -4,7 +4,6 @@ import pprint
 from datetime import datetime
 from textwrap import dedent
 
-import openlit
 import polars as pl
 import structlog
 from dotenv import load_dotenv
@@ -198,5 +197,4 @@ def process_image(
 
 if __name__ == "__main__":
     load_dotenv(override=True)
-    openlit.init(disable_batch=True)
     main()
