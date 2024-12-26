@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "mlflow>=2.19.0",
     "openai==1.58.1",
     "pandas>=2.2.3",
     "polars>=1.18.0",

@@ -4,6 +4,7 @@ import pprint
 from datetime import datetime
 from textwrap import dedent
 
+import mlflow
 import polars as pl
 import structlog
 from dotenv import load_dotenv
@@ -12,6 +13,9 @@ from pydantic import BaseModel
 
 
 def main():
+    load_dotenv(override=True)
+    mlflow.openai.autolog()
+    mlflow.set_tracking_uri("http://localhost:5000")
     log = structlog.get_logger()
 
     image_paths = find_image_paths()
@@ -196,5 +200,4 @@ def process_image(
 
 
 if __name__ == "__main__":
-    load_dotenv(override=True)
     main()
