@@ -41,7 +41,7 @@ def process_image(
     client: OpenAI,
     image_path: str,
 ):
-    model = "gpt-4o"
+    model = os.getenv("OPENAI_MODEL")
     base64_image = encode_image(image_path)
 
     response = client.chat.completions.create(
