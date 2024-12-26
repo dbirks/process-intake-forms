@@ -75,10 +75,13 @@ def process_image(
     system_prompt = dedent(
         f"""
         You are a helpful assistant who is helping a user to extract data from pictures of intake forms.
+        Each intake form image could apply to just one ID or multiple IDs.
+        In the case of multiple IDs, return an entry for each, with the same data if differences aren't specified.
 
-        You have the following reports in CSV format from previous years to use as a reference:
+        CAGO is an abbreviation for Canada Goose.
+
+        You should refer to the previous years' reports to know what format to return the data in:
         {string_of_csvs}
-
         """
     )
 
