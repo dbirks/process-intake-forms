@@ -6,7 +6,7 @@ from datetime import datetime
 from textwrap import dedent
 
 import openlit
-import pandas as pd
+import polars as pl
 import structlog
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -148,7 +148,7 @@ def append_to_output_csv(intake_forms: IntakeForms, output_csv_name: str):
 
 
 def sort_csv_by_id(output_csv_name: str):
-    df = pd.read_csv(output_csv_name)
+    df = pl.read_csv(output_csv_name)
     df = df.sort_values(by=["id_number"])
     df.to_csv(output_csv_name, index=False)
 
