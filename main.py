@@ -64,6 +64,7 @@ class IntakeForm(BaseModel):
     condition: str
     intake_date: str
     rescuer_name: str | None
+    rescuer_city: str | None
     county_found: str | None
     final_disposition: str | None
     county_released: str | None
@@ -139,8 +140,10 @@ def process_image(
 def append_to_output_csv(intake_forms: IntakeForms, output_csv_name: str):
     with open(output_csv_name, "a") as output_csv:
         for intake_form in intake_forms.list_of_intake_forms:
+            # Putting these in one cell, separated by a newline
+            rescuer_info = f'"{intake_form.rescuer_name}\n{intake_form.rescuer_city}"'
             output_csv.write(
-                f"{intake_form.id_number},{intake_form.species},{intake_form.condition},{intake_form.intake_date},{intake_form.rescuer_name},{intake_form.county_found},{intake_form.final_disposition},{intake_form.county_released},{intake_form.disposition_date}\n"
+                f"{intake_form.id_number},{intake_form.species},{intake_form.condition},{intake_form.intake_date},{rescuer_info},{intake_form.county_found},{intake_form.final_disposition},{intake_form.county_released},{intake_form.disposition_date}\n"
             )
 
 
