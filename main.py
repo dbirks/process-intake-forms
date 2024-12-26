@@ -1,11 +1,12 @@
 import base64
-from datetime import datetime
 import glob
 import os
 import pprint
+from datetime import datetime
 from textwrap import dedent
 
 import openlit
+import pandas as pd
 import structlog
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -31,13 +32,20 @@ def main():
 
     client = OpenAI()
 
+    current_time = datetime.now().strftime("%Y%m%d_%H%M")
+    output_csv_name = f"outputs/output_{current_time}.csv"
+
     for image_path in image_paths:
         log.info("Processing image", image_path=image_path)
         result: IntakeForms = process_image(client, image_path)
         log.info("Received result", result=pprint.pformat(result.model_dump()))
 
-        log.info("Appending to output CSV")
-        append_to_output_csv(result)
+        log.info("Appending to output CSV", output_csv_name=output_csv_name)
+        append_to_output_csv(intake_forms=result, output_csv_name=output_csv_name)
+
+    log.info("Finished processing images")
+    log.info("Sorting csv by ID number", output_csv_name=output_csv_name)
+    sort_csv_by_id(output_csv_name)
 
 
 def encode_image(image_path):
@@ -128,15 +136,18 @@ def process_image(
     return completion.choices[0].message.parsed
 
 
-def append_to_output_csv(intake_forms: IntakeForms):
-    current_time = datetime.now().strftime("%Y%m%d_%H%M")
-    output_csv_name = f"outputs/output_{current_time}.csv"
-
+def append_to_output_csv(intake_forms: IntakeForms, output_csv_name: str):
     with open(output_csv_name, "a") as output_csv:
         for intake_form in intake_forms.list_of_intake_forms:
             output_csv.write(
                 f"{intake_form.id_number},{intake_form.species},{intake_form.condition},{intake_form.intake_date},{intake_form.rescuer_name},{intake_form.county_found},{intake_form.final_disposition},{intake_form.county_released},{intake_form.disposition_date}\n"
             )
+
+
+def sort_csv_by_id(output_csv_name: str):
+    df = pd.read_csv(output_csv_name)
+    df = df.sort_values(by=["id_number"])
+    df.to_csv(output_csv_name, index=False)
 
 
 if __name__ == "__main__":
