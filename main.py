@@ -1,5 +1,4 @@
 import base64
-import glob
 import os
 import pprint
 from datetime import datetime
@@ -16,6 +15,46 @@ from pydantic import BaseModel
 def main():
     log = structlog.get_logger()
 
+    image_paths = find_image_paths()
+    log.info("Found images to process", count=len(image_paths))
+
+    client = OpenAI()
+
+    current_time = datetime.now().strftime("%Y%m%d_%H%M")
+    output_csv_name = f"outputs/output_{current_time}.csv"
+
+    df = pl.DataFrame(
+        {
+            "id_number": [],
+            "species": [],
+            "condition": [],
+            "intake_date": [],
+            "rescuer_info": [],
+            "county_found": [],
+            "final_disposition": [],
+            "county_released": [],
+            "disposition_date": [],
+        }
+    )
+
+    for image_path in image_paths:
+        log.info("Processing image", image_path=image_path)
+        result: IntakeForms = process_image(client, image_path)
+        log.info("Received result", result=pprint.pformat(result.model_dump()))
+        df.append(result.list_of_intake_forms)
+
+        # log.info("Appending to output CSV", output_csv_name=output_csv_name)
+        # append_to_output_csv(intake_forms=result, output_csv_name=output_csv_name)
+
+    log.info("Finished processing images")
+
+    log.info("Writing to output CSV", output_csv_name=output_csv_name)
+    df.to_csv(output_csv_name, index=False)
+    # log.info("Sorting csv by ID number", output_csv_name=output_csv_name)
+    # sort_csv_by_id(output_csv_name)
+
+
+def find_image_paths():
     images_directory = "inputs/images"
 
     image_filenames = [
@@ -28,24 +67,7 @@ def main():
         os.path.join(images_directory, filename) for filename in image_filenames
     ]
 
-    log.info("Found images to process", count=len(image_paths))
-
-    client = OpenAI()
-
-    current_time = datetime.now().strftime("%Y%m%d_%H%M")
-    output_csv_name = f"outputs/output_{current_time}.csv"
-
-    for image_path in image_paths:
-        log.info("Processing image", image_path=image_path)
-        result: IntakeForms = process_image(client, image_path)
-        log.info("Received result", result=pprint.pformat(result.model_dump()))
-
-        log.info("Appending to output CSV", output_csv_name=output_csv_name)
-        append_to_output_csv(intake_forms=result, output_csv_name=output_csv_name)
-
-    log.info("Finished processing images")
-    log.info("Sorting csv by ID number", output_csv_name=output_csv_name)
-    sort_csv_by_id(output_csv_name)
+    return image_paths
 
 
 def encode_image(image_path):
@@ -91,9 +113,10 @@ def process_image(
         The ID numbers should range from 1 to 2000, alternately written as 24-0001 to 24-2000.
         For example, if you see an ID of 081-084, you should return a list of IntakeForm objects with IDs of 24-0081, 24-0082, 24-0083, and 24-0084.
 
-        CAGO is an abbreviation for Canada Goose.
-        Return dates in the format MM.DD.YY, like 11.30.24.
-        Abbreviate Indianapolis as Indpls.
+        Formatting notes:
+          - CAGO is an abbreviation for Canada Goose
+          - Return dates in the format MM.DD.YY, like 11.30.24
+          - Abbreviate Indianapolis as Indpls
         """
     )
 
@@ -139,10 +162,10 @@ def append_to_output_csv(intake_forms: IntakeForms, output_csv_name: str):
             )
 
 
-def sort_csv_by_id(output_csv_name: str):
-    df = pl.read_csv(output_csv_name)
-    df = df.sort_values(by=["id_number"])
-    df.to_csv(output_csv_name, index=False)
+# def sort_csv_by_id(output_csv_name: str):
+#     df = pl.read_csv(output_csv_name)
+#     df = df.sort_values(by=["id_number"])
+#     df.to_csv(output_csv_name, index=False)
 
 
 if __name__ == "__main__":
