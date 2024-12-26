@@ -29,7 +29,8 @@ def main():
             "species": [],
             "condition": [],
             "intake_date": [],
-            "rescuer_info": [],
+            "rescuer_name": [],
+            "rescuer_city": [],
             "county_found": [],
             "final_disposition": [],
             "county_released": [],
@@ -41,14 +42,32 @@ def main():
         log.info("Processing image", image_path=image_path)
         result: IntakeForms = process_image(client, image_path)
         log.info("Received result", result=pprint.pformat(result.model_dump()))
-        df.append(result.list_of_intake_forms)
+        for intake_form in result.list_of_intake_forms:
+            df.vstack(
+                pl.DataFrame(
+                    {
+                        "id_number": [intake_form.id_number],
+                        "species": [intake_form.species],
+                        "condition": [intake_form.condition],
+                        "intake_date": [intake_form.intake_date],
+                        "rescuer_name": [intake_form.rescuer_name],
+                        "rescuer_city": [intake_form.rescuer_city],
+                        "county_found": [intake_form.county_found],
+                        "final_disposition": [intake_form.final_disposition],
+                        "county_released": [intake_form.county_released],
+                        "disposition_date": [intake_form.disposition_date],
+                    }
+                )
+            )
 
         # log.info("Appending to output CSV", output_csv_name=output_csv_name)
         # append_to_output_csv(intake_forms=result, output_csv_name=output_csv_name)
 
     log.info("Finished processing images")
 
-    log.info("Writing to output CSV", output_csv_name=output_csv_name)
+    log.info(
+        "Writing to output CSV", output_csv_name=output_csv_name, df_length=len(df)
+    )
     df.to_csv(output_csv_name, index=False)
     # log.info("Sorting csv by ID number", output_csv_name=output_csv_name)
     # sort_csv_by_id(output_csv_name)
