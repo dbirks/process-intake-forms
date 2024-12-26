@@ -1,6 +1,7 @@
 import base64
 import glob
 import os
+import pprint
 from textwrap import dedent
 
 import openlit
@@ -12,7 +13,7 @@ from pydantic import BaseModel
 
 def main():
     log = structlog.get_logger()
-    load_dotenv(override=True)
+    load_dotenv()
     openlit.init()
 
     images_directory = "inputs/images"
@@ -33,8 +34,8 @@ def main():
 
     for image_path in image_paths:
         log.info("Processing image", image_path=image_path)
-        result = process_image(client, image_path)
-        log.info("Result", result=result)
+        result: IntakeForms = process_image(client, image_path)
+        log.info("Received result", result=pprint.pformat(result.model_dump()))
 
 
 def encode_image(image_path):
@@ -66,7 +67,7 @@ class IntakeForms(BaseModel):
 def process_image(
     client: OpenAI,
     image_path: str,
-):
+) -> IntakeForms:
     model = os.getenv("OPENAI_MODEL")
     base64_image = encode_image(image_path)
     previous_reports_path = "inputs/previous_years_reports"
@@ -123,6 +124,14 @@ def process_image(
     )
 
     return completion.choices[0].message.parsed
+
+
+def append_to_output_csv(intake_forms: IntakeForms):
+    with open("output.csv", "a") as output_csv:
+        for intake_form in intake_forms.list_of_intake_forms:
+            output_csv.write(
+                f"{intake_form.id_number},{intake_form.species},{intake_form.condition},{intake_form.intake_date},{intake_form.rescuer_name},{intake_form.county_found},{intake_form.final_disposition},{intake_form.county_released},{intake_form.disposition_date}\n"
+            )
 
 
 if __name__ == "__main__":
