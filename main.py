@@ -12,7 +12,7 @@ from openai import OpenAI
 
 def main():
     log = structlog.get_logger()
-    load_dotenv()
+    load_dotenv(override=True)
     openlit.init()
 
     images_directory = "inputs/images"
