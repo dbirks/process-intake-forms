@@ -38,9 +38,9 @@ def main():
                         "species": [intake_form.species],
                         "condition": [intake_form.condition],
                         "intake_date": [intake_form.intake_date],
-                        # Putting these in one cell separated by several spaces, so it wraps in the cell, to meet requirements
+                        # Making these wrap in one cell, separated by spaces and not newlines, to meet requirements
                         "rescuer_name": [
-                            f"intake_form.rescuer_name              intake_form.rescuer_city"
+                            f"{intake_form.rescuer_name}                    {intake_form.rescuer_city}"
                         ],
                         "county_found": [intake_form.county_found],
                         "final_disposition": [intake_form.final_disposition],
@@ -58,7 +58,7 @@ def main():
 
     # Sort by ID number
     df = df.sort("id_number")
-    log.info("Sorted dataframe by ID number", df_length=len(df), id_numbers=df["id_number"])
+    log.info("Sorted dataframe by ID number", df_length=len(df), id_numbers=df["id_number"].to_list())
 
     log.info(
         "Writing to output CSV", output_csv_name=output_csv_name, df_length=len(df)
