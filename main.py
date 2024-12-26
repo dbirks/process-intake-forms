@@ -59,6 +59,10 @@ class IntakeForm(BaseModel):
     disposition_date: str | None
 
 
+class IntakeForms(BaseModel):
+    list_of_intake_forms: list[IntakeForm]
+
+
 def process_image(
     client: OpenAI,
     image_path: str,
@@ -75,10 +79,14 @@ def process_image(
     system_prompt = dedent(
         f"""
         You are a helpful assistant who is helping a user to extract data from pictures of intake forms.
+
         Each intake form image could apply to just one ID or multiple IDs.
         In the case of multiple IDs, return an entry for each, with the same data if differences aren't specified.
+        The ID numbers should range from 1 to 2000, alternately written as 24-0001 to 24-2000.
+        For example, if you see an ID of 081-084, you should return a list of IntakeForm objects with IDs of 24-0081, 24-0082, 24-0083, and 24-0084.
 
         CAGO is an abbreviation for Canada Goose.
+        Return dates in the format MM.DD.YY, like 11.30.24.
 
         You should refer to the previous years' reports to know what format to return the data in:
         {string_of_csvs}
@@ -111,7 +119,7 @@ def process_image(
                 ],
             },
         ],
-        response_format=IntakeForm,
+        response_format=IntakeForms,
     )
 
     return completion.choices[0].message.parsed
