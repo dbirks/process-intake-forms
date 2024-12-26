@@ -1,9 +1,13 @@
-import os
 import base64
-from openai import OpenAI
-from dotenv import load_dotenv
+import glob
+import os
+import string
+from textwrap import dedent
+
 import openlit
 import structlog
+from dotenv import load_dotenv
+from openai import OpenAI
 
 
 def main():
@@ -38,16 +42,46 @@ def encode_image(image_path):
         return base64.b64encode(image_file.read()).decode("utf-8")
 
 
+def load_csv_into_string(csv_path):
+    with open(csv_path, "r") as csv_file:
+        return csv_file.read()
+
+
 def process_image(
     client: OpenAI,
     image_path: str,
 ):
     model = os.getenv("OPENAI_MODEL")
     base64_image = encode_image(image_path)
+    previous_reports_path = "inputs/previous_years_reports"
+
+    string_of_csvs = ""
+    for csv_file in glob.glob(f"{previous_reports_path}/*.csv"):
+        string_of_csvs += f"{csv_file}:\n"
+        string_of_csvs += load_csv_into_string(csv_file) + "\n"
+
+    system_prompt = dedent(
+        f"""
+        You are a helpful assistant who is helping a user to extract data from pictures of intake forms.
+
+        You have the following reports in CSV format from previous years to use as a reference:
+        {string_of_csvs}
+
+        """
+    )
 
     response = client.chat.completions.create(
         model=model,
         messages=[
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": system_prompt,
+                    }
+                ],
+            },
             {
                 "role": "user",
                 "content": [
