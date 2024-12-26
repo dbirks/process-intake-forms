@@ -1,4 +1,5 @@
 import base64
+from datetime import datetime
 import glob
 import os
 import pprint
@@ -36,6 +37,9 @@ def main():
         log.info("Processing image", image_path=image_path)
         result: IntakeForms = process_image(client, image_path)
         log.info("Received result", result=pprint.pformat(result.model_dump()))
+
+        log.info("Appending to output CSV")
+        append_to_output_csv(result)
 
 
 def encode_image(image_path):
@@ -127,7 +131,10 @@ def process_image(
 
 
 def append_to_output_csv(intake_forms: IntakeForms):
-    with open("output.csv", "a") as output_csv:
+    current_time = datetime.now().strftime("%Y%m%d_%H%M")
+    output_csv_name = f"outputs/output_{current_time}.csv"
+
+    with open(output_csv_name, "a") as output_csv:
         for intake_form in intake_forms.list_of_intake_forms:
             output_csv.write(
                 f"{intake_form.id_number},{intake_form.species},{intake_form.condition},{intake_form.intake_date},{intake_form.rescuer_name},{intake_form.county_found},{intake_form.final_disposition},{intake_form.county_released},{intake_form.disposition_date}\n"
