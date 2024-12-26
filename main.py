@@ -2,15 +2,16 @@ import os
 import base64
 from openai import OpenAI
 from dotenv import load_dotenv
+import openlit
 import structlog
 
 
 def main():
     log = structlog.get_logger()
     load_dotenv()
+    openlit.init()
 
-    images_directory = "./images"
-    # process_images_in_directory(images_directory)
+    images_directory = "inputs/images"
 
     image_filenames = [
         filename
