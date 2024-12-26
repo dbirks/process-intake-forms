@@ -1,11 +1,12 @@
 import os
 import base64
 import openai
+from dotenv import load_dotenv
 
 
 def process_images_in_directory(images_dir):
     for filename in os.listdir(images_dir):
-        if filename.lower().endswith((".png", ".jpg", ".jpeg")):
+        if filename.lower().endswith((".jpg")):
             image_path = os.path.join(images_dir, filename)
             with open(image_path, "rb") as img_file:
                 image_data = base64.b64encode(img_file.read()).decode("utf-8")
@@ -31,7 +32,8 @@ def process_images_in_directory(images_dir):
 
 
 def main():
-    images_directory = "/path/to/screenshots"
+    load_dotenv()
+    images_directory = "./images"
     process_images_in_directory(images_directory)
 
 
