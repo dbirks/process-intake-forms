@@ -47,7 +47,7 @@ services:
     depends_on:
       - clickhouse
     volumes:
-      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+      - ./docker/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
     restart: always
 
 volumes:
