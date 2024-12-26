@@ -13,7 +13,7 @@ services:
     restart: always
 
   openlit:
-    image: ghcr.io/openlit/openlit:latest
+    image: ghcr.io/openlit/openlit:1.11.6
     container_name: openlit
     environment:
       INIT_DB_HOST: clickhouse
