@@ -1,34 +1,46 @@
 import os
 import base64
-import openai
+from openai import OpenAI
 from dotenv import load_dotenv
 
 
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode("utf-8")
+
+
 def process_images_in_directory(images_dir):
+    client = OpenAI()
+
     for filename in os.listdir(images_dir):
         if filename.lower().endswith((".jpg")):
             image_path = os.path.join(images_dir, filename)
-            with open(image_path, "rb") as img_file:
-                image_data = base64.b64encode(img_file.read()).decode("utf-8")
 
-            response = openai.ChatCompletion.create(
-                model="gpt-4o",
+            # Getting the base64 string
+            base64_image = encode_image(image_path)
+
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
                 messages=[
                     {
-                        "role": "system",
-                        "content": "You are an AI that extracts important details from form images.",
-                    },
-                    {
                         "role": "user",
-                        "content": f"Here is an image in base64: {image_data}\nIdentify all important details in this form.",
-                    },
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "What is in this image?",
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}"
+                                },
+                            },
+                        ],
+                    }
                 ],
             )
-            print(
-                f"Result for {filename}:\n",
-                response["choices"][0]["message"]["content"],
-                "\n",
-            )
+
+            print(response.choices[0].message.content)
 
 
 def main():
