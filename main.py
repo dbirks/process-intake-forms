@@ -13,8 +13,8 @@ from pydantic import BaseModel
 
 def main():
     log = structlog.get_logger()
-    load_dotenv()
-    openlit.init()
+    load_dotenv(override=True)
+    openlit.init(disable_batch=True)
 
     images_directory = "inputs/images"
 
