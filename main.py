@@ -14,8 +14,6 @@ from pydantic import BaseModel
 
 def main():
     log = structlog.get_logger()
-    load_dotenv(override=True)
-    openlit.init(disable_batch=True)
 
     images_directory = "inputs/images"
 
@@ -142,4 +140,6 @@ def append_to_output_csv(intake_forms: IntakeForms):
 
 
 if __name__ == "__main__":
+    load_dotenv(override=True)
+    openlit.init(disable_batch=True)
     main()
