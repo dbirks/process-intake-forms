@@ -85,7 +85,7 @@ def process_image(
         """
     )
 
-    response = client.chat.completions.create(
+    completion = client.beta.chat.completions.parse(
         model=model,
         messages=[
             {
@@ -111,10 +111,10 @@ def process_image(
                 ],
             },
         ],
-        response_format=list[IntakeForm],
+        response_format=IntakeForm,
     )
 
-    return response.choices[0].message.content
+    return completion.choices[0].message.parsed
 
 
 if __name__ == "__main__":
