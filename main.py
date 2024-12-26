@@ -1,13 +1,13 @@
 import base64
 import glob
 import os
-import string
 from textwrap import dedent
 
 import openlit
 import structlog
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic import BaseModel
 
 
 def main():
@@ -45,6 +45,18 @@ def encode_image(image_path):
 def load_csv_into_string(csv_path):
     with open(csv_path, "r") as csv_file:
         return csv_file.read()
+
+
+class IntakeForm(BaseModel):
+    id_number: str
+    species: str
+    condition: str
+    intake_date: str
+    rescuer_name: str | None
+    county_found: str | None
+    final_disposition: str | None
+    county_released: str | None
+    disposition_date: str | None
 
 
 def process_image(
@@ -94,8 +106,9 @@ def process_image(
                         "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
                     },
                 ],
-            }
+            },
         ],
+        response_format=list[IntakeForm],
     )
 
     return response.choices[0].message.content
