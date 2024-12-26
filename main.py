@@ -58,7 +58,11 @@ def main():
 
     # Sort by ID number
     df = df.sort("id_number")
-    log.info("Sorted dataframe by ID number", df_length=len(df), id_numbers=df["id_number"].to_list())
+    log.info(
+        "Sorted dataframe by ID number",
+        df_length=len(df),
+        id_numbers=df["id_number"].to_list(),
+    )
 
     log.info(
         "Writing to output CSV", output_csv_name=output_csv_name, df_length=len(df)
@@ -118,6 +122,12 @@ def process_image(
     model = os.getenv("OPENAI_MODEL")
     base64_image = encode_image(image_path)
 
+    previous_years_reports: str
+    for filename in os.listdir("inputs/previous_years_reports"):
+        if filename.endswith(".csv"):
+            with open(f"inputs/previous_years_reports/{filename}", "r") as f:
+                previous_years_reports = f.read()
+
     system_prompt = dedent(
         f"""
         You are a helpful assistant who is helping a user to extract data from pictures of intake forms.
@@ -132,6 +142,9 @@ def process_image(
           - Return dates in the format MM.DD.YY, like 11.30.24
           - Abbreviate Indianapolis as Indpls
           - If the final disposition is "D", then the animal has died, and the county released should be None
+
+        Refer to the previous years' reports for examples of species, conditions, and counties:
+        {previous_years_reports}
         """
     )
 
