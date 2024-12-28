@@ -156,6 +156,7 @@ def process_image(
 
         Additional notes:
           - CAGO is an abbreviation for Canada Goose
+          - If the species is just "duck", use "Mallard" instead
           - You MUST return dates in the format MM.DD.YY, like 11.30.24
           - You MUST abbreviate Indianapolis as Indpls
           - If the final_disposition is "D" or "E", then the county_released MUST be "N/A"
@@ -166,6 +167,7 @@ def process_image(
           - On the form, county_released is written as "Co Rel"
           - On the form, final_disposition is written as "Final Disp"
           - On the form, disposition_date is written as "DT"
+          - All of the dates should be for 2024, written as 24 in the format MM.DD.YY
 
         Refer to a list of conditions from previous years' report and follow the style of the condition notes:
         {conditions}
