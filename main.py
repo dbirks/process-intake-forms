@@ -1,4 +1,5 @@
 import base64
+from enum import Enum
 import os
 import pprint
 from datetime import datetime
@@ -65,13 +66,13 @@ def main():
 
     log.info("Finished processing images")
 
-    # Sort by ID number
-    df = df.sort("id_number")
-    log.info(
-        "Sorted dataframe by ID number",
-        df_length=len(df),
-        id_numbers=df["id_number"].to_list(),
-    )
+    # # Sort by ID number
+    # df = df.sort("id_number")
+    # log.info(
+    #     "Sorted dataframe by ID number",
+    #     df_length=len(df),
+    #     id_numbers=df["id_number"].to_list(),
+    # )
 
     log.info(
         "Writing to output CSV", output_csv_name=output_csv_name, df_length=len(df)
@@ -109,7 +110,7 @@ def encode_image(image_path):
 
 class IntakeForm(BaseModel):
     id_number: str
-    species: str
+    species: str | None =  "Bat, Big Brown" | "Bat, Eastern Red" | "Bat, Evening" | "Bat, Silver-haired" | "Blackbird, Red-winged" | "Bluebird" | "Canada Goose" | "Cardinal, Northern" | "Chipmunk" | "Cowbird, Brown-headed" | "Crow, American" | "Eastern Cottontail" | "Finch, House" | "Goldfinch, American" | "Grackle" | "Grackle, Common" | "Grebe, Pied-billed" | "Ground Hog" | "Hawk, Cooper's" | "Hawk, Red-shouldered" | "Hawk, Red-tailed" | "Hawk, Sharp-shinned" | "House Wren" | "Hummingbird" | "Kestrel" | "Kestrel, American" | "Loon, Common" | "Mallard" | "Mockingbird, Northern" | "Mourning Dove" | "Nighthawk, Common" | "Northern Flicker" | "Nuthatch, White-breasted" | "Owl, Barred" | "Owl, Eastern Screech" | "Owl, Great horned" | "Peregrine Falcon" | "Robin, American" | "Sapsucker, Yellow-bellied" | "Slider, Yellow-bellied" | "Sparrow, Song" | "Squirrel" | "Thrasher, Brown" | "Turtle, Eastern Box" | "Turtle, Painted" | "Turtle, Snapping" | "Woodcock" | "Wood Duck" | "Woodpecker, Downy" | "Woodpecker, Red-bellied" | "Wren, Carolina" | "Yellow-billed Cuckoo" | "Yellowthroat, Common"
     condition: str
     intake_date: str
     rescuer_name: str | None
@@ -131,11 +132,15 @@ def process_image(
     model = os.getenv("OPENAI_MODEL")
     base64_image = encode_image(image_path)
 
-    previous_years_reports: str
-    for filename in os.listdir("inputs/previous_years_reports"):
-        if filename.endswith(".csv"):
-            with open(f"inputs/previous_years_reports/{filename}", "r") as f:
-                previous_years_reports = f.read()
+    # previous_years_reports: str
+    # for filename in os.listdir("inputs/previous_years_reports"):
+    #     if filename.endswith(".csv"):
+    #         with open(f"inputs/previous_years_reports/{filename}", "r") as f:
+    #             previous_years_reports = f.read()
+
+    # Get a list of conditions from the previous years' reports
+    df = pl.read_csv("inputs/previous_years_reports/DNR-2020.csv")
+    conditions = df["Condition"].unique().to_list()
 
     system_prompt = dedent(
         f"""
@@ -148,12 +153,14 @@ def process_image(
 
         Additional notes:
           - CAGO is an abbreviation for Canada Goose
-          - Return dates in the format MM.DD.YY, like 11.30.24
-          - Abbreviate Indianapolis as Indpls
+          - You MUST return dates in the format MM.DD.YY, like 11.30.24
+          - You MUST abbreviate Indianapolis as Indpls
           - If the final disposition is "D", then the animal has died, and the county released should be None
+          - The counties MUST all be counties from the state of Indiana
+          - The id_number MUST be between 24-0001 and 24-2000
 
-        Refer to the previous years' reports for examples of species, conditions, and counties:
-        {previous_years_reports}
+        Refer to a list of conditions from previous years' report and follow the style of the condition notes:
+        {conditions}
         """
     )
 

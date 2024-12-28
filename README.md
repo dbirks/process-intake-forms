@@ -14,7 +14,8 @@ find inputs/images -maxdepth 1 -type f | xargs -I {} magick {} -rotate -90 {}
 
 ## todo
 
-- [ ] list species instead of whole csv
-- [ ] indiana counties only
-- [ ] ids must be between 0000 and 2000
-- [ ] don't sort
+- [x] list species instead of whole csv
+- [x] list conditions
+- [x] indiana counties only
+- [x] ids must be between 0000 and 2000
+- [x] don't sort
