@@ -162,6 +162,10 @@ def process_image(
           - The final_disposition MUST be one of the following: D, R, or E
           - The counties MUST all be counties from the state of Indiana
           - The id_number MUST be between 24-0001 and 24-2000
+          - On the form, county_found is written as "Co Found"
+          - On the form, county_released is written as "Co Rel"
+          - On the form, final_disposition is written as "Final Disp"
+          - On the form, disposition_date is written as "DT"
 
         Refer to a list of conditions from previous years' report and follow the style of the condition notes:
         {conditions}
