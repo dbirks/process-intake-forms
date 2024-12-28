@@ -1,5 +1,13 @@
-# Modified from: https://github.com/Arize-ai/phoenix/blob/main/docker-compose.yml
 services:
+  app:
+    image: ghcr.io/astral-sh/uv:debian-slim
+    working_dir: /app
+    volumes: 
+      - ${PWD}:/app
+    entrypoint: uv
+    command: run main.py
+
+  # Modified from: https://github.com/Arize-ai/phoenix/blob/main/docker-compose.yml
   phoenix:
     image: arizephoenix/phoenix:version-7.3.2
     depends_on:
@@ -9,6 +17,7 @@ services:
       - 4317:4317
     environment:
       - PHOENIX_SQL_DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+
   db:
     image: postgres:16
     restart: always

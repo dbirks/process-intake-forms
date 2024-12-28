@@ -14,10 +14,13 @@ from pydantic import BaseModel
 
 
 def main():
+    load_dotenv(override=True)
     log = structlog.get_logger()
+
     tracer_provider = register(
         # endpoint="http://localhost:6006/v1/traces",
-        endpoint="http://host.docker.internal:6007/v1/traces",
+        # endpoint="http://host.docker.internal:6007/v1/traces",
+        endpoint=os.getenv("PHOENIX_ENDPOINT"),
     )
     OpenAIInstrumentor().instrument(tracer_provider=tracer_provider)
 
@@ -203,5 +206,4 @@ def process_image(
 
 
 if __name__ == "__main__":
-    load_dotenv(override=True)
     main()
