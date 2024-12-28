@@ -1,5 +1,4 @@
 import base64
-from enum import Enum
 import os
 import pprint
 from datetime import datetime
@@ -61,25 +60,12 @@ def main():
             )
         log.info("Appended to dataframe", df_length=len(df), image_path=image_path)
 
-        # log.info("Appending to output CSV", output_csv_name=output_csv_name)
-        # append_to_output_csv(intake_forms=result, output_csv_name=output_csv_name)
-
     log.info("Finished processing images")
-
-    # # Sort by ID number
-    # df = df.sort("id_number")
-    # log.info(
-    #     "Sorted dataframe by ID number",
-    #     df_length=len(df),
-    #     id_numbers=df["id_number"].to_list(),
-    # )
 
     log.info(
         "Writing to output CSV", output_csv_name=output_csv_name, df_length=len(df)
     )
     df.write_csv(output_csv_name)
-    # log.info("Sorting csv by ID number", output_csv_name=output_csv_name)
-    # sort_csv_by_id(output_csv_name)
 
 
 def find_image_paths():
@@ -103,11 +89,6 @@ def find_image_paths():
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode("utf-8")
-
-
-# def load_csv_into_string(csv_path):
-#     with open(csv_path, "r") as csv_file:
-#         return csv_file.read()
 
 
 class IntakeForm(BaseModel):
@@ -134,13 +115,7 @@ def process_image(
     model = os.getenv("OPENAI_MODEL")
     base64_image = encode_image(image_path)
 
-    # previous_years_reports: str
-    # for filename in os.listdir("inputs/previous_years_reports"):
-    #     if filename.endswith(".csv"):
-    #         with open(f"inputs/previous_years_reports/{filename}", "r") as f:
-    #             previous_years_reports = f.read()
-
-    # Get a list of conditions from the previous years' reports
+    # Get a list of conditions and species from the previous years' reports
     df = pl.read_csv("inputs/previous_years_reports/DNR-2020.csv")
     conditions = df["Condition"].unique().to_list()
     species = df["Species"].unique().to_list()
@@ -209,22 +184,6 @@ def process_image(
     )
 
     return completion.choices[0].message.parsed
-
-
-# def append_to_output_csv(intake_forms: IntakeForms, output_csv_name: str):
-#     with open(output_csv_name, "a") as output_csv:
-#         for intake_form in intake_forms.list_of_intake_forms:
-#             # Putting these in one cell, separated by several spaces so it wraps in the cell, to meet requirements
-#             rescuer_info = f'"{intake_form.rescuer_name}                {intake_form.rescuer_city}"'
-#             output_csv.write(
-#                 f"{intake_form.id_number},{intake_form.species},{intake_form.condition},{intake_form.intake_date},{rescuer_info},{intake_form.county_found},{intake_form.final_disposition},{intake_form.county_released},{intake_form.disposition_date}\n"
-#             )
-
-
-# def sort_csv_by_id(output_csv_name: str):
-#     df = pl.read_csv(output_csv_name)
-#     df = df.sort_values(by=["id_number"])
-#     df.to_csv(output_csv_name, index=False)
 
 
 if __name__ == "__main__":
