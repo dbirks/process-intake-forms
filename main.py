@@ -8,17 +8,17 @@ import polars as pl
 import structlog
 from dotenv import load_dotenv
 from openai import OpenAI
-# from openinference.instrumentation.openai import OpenAIInstrumentor
-# from phoenix.otel import register
+from openinference.instrumentation.openai import OpenAIInstrumentor
+from phoenix.otel import register
 from pydantic import BaseModel
 
 
 def main():
     log = structlog.get_logger()
-    # tracer_provider = register(
-    #     endpoint="http://localhost:6006/v1/traces",
-    # )
-    # OpenAIInstrumentor().instrument(tracer_provider=tracer_provider)
+    tracer_provider = register(
+        endpoint="http://localhost:6006/v1/traces",
+    )
+    OpenAIInstrumentor().instrument(tracer_provider=tracer_provider)
 
     image_paths = find_image_paths()
     log.info("Found images to process", count=len(image_paths))
