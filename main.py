@@ -158,7 +158,7 @@ def process_image(
           - CAGO is an abbreviation for Canada Goose
           - You MUST return dates in the format MM.DD.YY, like 11.30.24
           - You MUST abbreviate Indianapolis as Indpls
-          - If the final disposition is "D", then the animal has died, and the county released should be None
+          - If the final disposition is "D", then the county_released MUST be "N/A"
           - The counties MUST all be counties from the state of Indiana
           - The id_number MUST be between 24-0001 and 24-2000
 
