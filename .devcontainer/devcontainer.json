@@ -1,0 +1,20 @@
+{
+  "name": "process-intake-forms",
+  "image": "mcr.microsoft.com/devcontainers/python:3.13",
+  "features": {
+    "ghcr.io/va-h/devcontainers-features/uv:1": {
+      "shellautocompletion": true,
+      "version": "latest"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "charliermarsh.ruff",
+        "redhat.vscode-yaml",
+        "yzhang.markdown-all-in-one",
+        "stephlin.vscode-tmux-keybinding"
+      ]
+    }
+  }
+}
