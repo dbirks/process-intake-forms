@@ -5,7 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "arize-phoenix-otel>=0.6.1",
     "openai==1.58.1",
+    "openinference-instrumentation-openai>=0.1.18",
     "pandas>=2.2.3",
     "polars>=1.18.0",
     "python-dotenv==1.0.1",
