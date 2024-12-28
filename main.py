@@ -16,7 +16,8 @@ from pydantic import BaseModel
 def main():
     log = structlog.get_logger()
     tracer_provider = register(
-        endpoint="http://localhost:6006/v1/traces",
+        # endpoint="http://localhost:6006/v1/traces",
+        endpoint="http://host.docker.internal:6007/v1/traces",
     )
     OpenAIInstrumentor().instrument(tracer_provider=tracer_provider)
 

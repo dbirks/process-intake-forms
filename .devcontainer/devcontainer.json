@@ -17,5 +17,8 @@
         "stephlin.vscode-tmux-keybinding"
       ]
     }
-  }
+  },
+  "runArgs": [
+    "--add-host=host.docker.internal:host-gateway"
+  ]
 }
