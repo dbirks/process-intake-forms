@@ -172,6 +172,8 @@ def process_image(
 
         The species SHOULD be one of the following:
         {species}
+
+        Thank you so much for your help!
         """
     )
 
