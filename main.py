@@ -26,7 +26,7 @@ def main():
     # OpenAIInstrumentor().instrument(tracer_provider=tracer_provider)
 
     image_paths = find_image_paths()
-    log.info("Found images to process", count=len(image_paths))
+    log.info("Found images to process", count=len(image_paths), image_paths=image_paths)
 
     client = OpenAI()
 
@@ -94,6 +94,8 @@ def find_image_paths():
     image_paths = [
         os.path.join(images_directory, filename) for filename in image_filenames
     ]
+
+    image_paths.sort(key=lambda p: os.path.getmtime(p))
 
     return image_paths
 
