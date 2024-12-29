@@ -81,7 +81,7 @@ def find_image_paths():
         os.path.join(images_directory, filename) for filename in image_filenames
     ]
 
-    image_paths.sort(key=lambda p: os.path.getmtime(p))
+    image_paths.sort(key=lambda p: os.path.basename(p))
 
     return image_paths
 
