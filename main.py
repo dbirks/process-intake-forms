@@ -145,6 +145,7 @@ def process_image(
           - On the form, final_disposition is written as "Final Disp"
           - On the form, disposition_date is written as "DT"
           - All of the dates should be for 2024, written as 24 in the format MM.DD.YY
+          - If the rescuer name doesn't have a last name, use NoLastName
 
         Refer to a list of conditions from previous years' report and follow the style of the condition notes:
         {conditions}
