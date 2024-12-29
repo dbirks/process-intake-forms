@@ -131,6 +131,8 @@ def process_image(
 
         Additional notes:
           - CAGO is an abbreviation for Canada Goose
+          - GHOW is an abbreviation for Great Horned Owl
+          - RTH is an abbreviation for Red-Tailed Hawk
           - If the species is just "duck", use "Mallard" instead
           - You MUST return dates in the format MM.DD.YY, like 11.30.24
           - You MUST abbreviate Indianapolis as Indpls
