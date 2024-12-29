@@ -49,7 +49,7 @@ def main():
                         "intake_date": [intake_form.intake_date],
                         # Making these wrap in one cell, separated by spaces and not newlines, to meet requirements
                         "rescuer_name": [
-                            f"{intake_form.rescuer_name}                    {intake_form.rescuer_city}"
+                            f"{intake_form.rescuer_name}                         {intake_form.rescuer_city}"
                         ],
                         "county_found": [intake_form.county_found],
                         "final_disposition": [intake_form.final_disposition],
