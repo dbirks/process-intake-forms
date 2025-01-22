@@ -146,6 +146,8 @@ def process_image(
           - On the form, disposition_date is written as "DT"
           - All of the dates should be for 2024, written as 24 in the format MM.DD.YY
           - If the rescuer name doesn't have a last name, use NoLastName
+          - If the condition is spread over multiple lines, join phrases with a comma where it makes sense, instead of using a hyphen
+          - If the condition is something like "gosling" or "duckling", then make the condition "orphan"
 
         Refer to a list of conditions from previous years' report and follow the style of the condition notes:
         {conditions}
