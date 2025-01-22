@@ -12,6 +12,7 @@ Rotate all images in the images folder 90 degrees to the left (without entering 
 find inputs/images -maxdepth 1 -type f | xargs -I {} magick {} -rotate -90 {}
 ```
 
+Set up dotenv file, add openai key, and run:
 ```
 cp .env.example .env
 uv run main.py
