@@ -17,3 +17,8 @@ Set up dotenv file, add openai key, and run:
 cp .env.example .env
 uv run main.py
 ```
+
+### To-do
+
+- [ ] write progress to csv instead of keeping a dataframe in memory, in case of any weird error that causes exit
+- [ ] parallelize so it doesn't take most of an hour to complete
