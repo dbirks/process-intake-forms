@@ -139,6 +139,7 @@ def process_image(
           - If the final_disposition is "D" or "E", then the county_released MUST be "N/A"
           - The final_disposition MUST be one of the following: D, R, or E
           - The counties MUST all be counties from the state of Indiana
+          - The city MUST be a city from the state of Indiana
           - The id_number MUST be between 24-0001 and 24-2000
           - On the form, county_found is written as "Co Found"
           - On the form, county_released is written as "Co Rel"
