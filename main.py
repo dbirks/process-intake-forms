@@ -151,6 +151,7 @@ def process_image(
           - If the condition is something like "gosling" or "duckling", then make the condition "orphan"
           - If the city is Indianapolis, but no county is listed, then make a best guess at the county based on the city or other location notes
           - If the county found is something like "Brown Co", then make the county found just "Brown"
+          - If the county is "unk", then make the county found "Unknown"
 
         Refer to a list of conditions from previous years' report and follow the style of the condition notes:
         {conditions}
