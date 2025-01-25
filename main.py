@@ -113,6 +113,7 @@ def process_image(
     image_path: str,
 ) -> IntakeForms:
     model = os.getenv("OPENAI_MODEL")
+    year = os.getenv("YEAR")
     base64_image = encode_image(image_path)
 
     # Get a list of conditions and species from the previous years' reports
@@ -126,27 +127,27 @@ def process_image(
 
         Each intake form image could apply to just one ID or multiple IDs.
         In the case of multiple IDs, return an entry for each, with the same data if differences aren't specified.
-        The ID numbers should range from 1 to 2000, alternately written as 24-0001 to 24-2000.
-        For example, if you see an ID of 081-084, you should return a list of IntakeForm objects with IDs of 24-0081, 24-0082, 24-0083, and 24-0084.
+        The ID numbers MUST range from 1 to 2000, alternately written as {year}-0001 to {year}-2000.
+        For example, if you see an ID of 081-084, you should return a list of IntakeForm objects with IDs of {year}-0081, {year}-0082, {year}-0083, and {year}-0084.
 
         Additional notes:
           - CAGO is an abbreviation for Canada Goose
           - GHOW is an abbreviation for Great Horned Owl
           - RTH is an abbreviation for Red-Tailed Hawk
           - If the species is just "duck", use "Mallard" instead
-          - You MUST return dates in the format MM.DD.YY, like 11.30.24
+          - You MUST return dates in the format MM.DD.YY, like 11.30.{year}
           - You MUST abbreviate Indianapolis as Indpls
           - You MUST write Indy as Indpls
           - If the final_disposition is "D" or "E", then the county_released MUST be "N/A"
           - The final_disposition MUST be one of the following: D, R, E, DOA, T, or P
           - The counties MUST all be counties from the state of Indiana
           - The city MUST be a city from the state of Indiana
-          - The id_number MUST be between 24-0001 and 24-2000
+          - The id_number MUST be between {year}-0001 and {year}-2000
           - On the form, county_found is written as "Co Found"
           - On the form, county_released is written as "Co Rel"
           - On the form, final_disposition is written as "Final Disp"
           - On the form, disposition_date is written as "DT"
-          - All of the dates should be for 2024, written as 24 in the format MM.DD.YY
+          - All of the dates should be for 20{year}, written as {year} in the format MM.DD.YY
           - If the rescuer name doesn't have a last name, use NoLastName
           - If the condition is spread over multiple lines, join phrases with a comma where it makes sense, instead of using a hyphen
           - If the condition is something like "gosling" or "duckling", then make the condition "orphan"
