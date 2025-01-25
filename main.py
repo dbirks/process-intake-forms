@@ -136,8 +136,9 @@ def process_image(
           - If the species is just "duck", use "Mallard" instead
           - You MUST return dates in the format MM.DD.YY, like 11.30.24
           - You MUST abbreviate Indianapolis as Indpls
+          - You MUST write Indy as Indpls
           - If the final_disposition is "D" or "E", then the county_released MUST be "N/A"
-          - The final_disposition MUST be one of the following: D, R, or E
+          - The final_disposition MUST be one of the following: D, R, E, DOA, T, or P
           - The counties MUST all be counties from the state of Indiana
           - The city MUST be a city from the state of Indiana
           - The id_number MUST be between 24-0001 and 24-2000
@@ -153,6 +154,7 @@ def process_image(
           - If the county found is something like "Brown Co", then make the county found just "Brown"
           - If the county is "unk", then make the county found "Unknown", but if it's blank, just leave it blank
           - For the rescuer name, enter just the main person's name, and not "+ 2 others" or any extra information
+          - If the species is hatchling, then change it to Songbird
 
         Refer to a list of conditions from previous years' report and follow the style of the condition notes:
         {conditions}
