@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "logfire==2.9.0",
     "openai==1.91.0",
     "polars==1.32.2",
     "python-dotenv==1.1.1",

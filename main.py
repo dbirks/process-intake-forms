@@ -4,6 +4,7 @@ import pprint
 from datetime import datetime
 from textwrap import dedent
 
+import logfire
 import polars as pl
 import structlog
 from dotenv import load_dotenv
@@ -14,6 +15,10 @@ from pydantic import BaseModel
 def main():
     load_dotenv(override=True)
     log = structlog.get_logger()
+
+    # Configure Logfire
+    logfire.configure()
+    logfire.instrument_openai()
 
     image_paths = find_image_paths()
     log.info("Found images to process", count=len(image_paths), image_paths=image_paths)
@@ -28,7 +33,9 @@ def main():
 
     for image_path in image_paths:
         log.info("Processing image", image_path=image_path)
-        intake_forms: IntakeForms = process_image(client, image_path)
+        with logfire.span('Processing intake form image', image_path=image_path):
+            intake_forms: IntakeForms = process_image(client, image_path)
+            logfire.info("Received result", result=intake_forms.model_dump())
         log.info("Received result", result=pprint.pformat(intake_forms.model_dump()))
         for intake_form in intake_forms.list_of_intake_forms:
             df = df.vstack(
