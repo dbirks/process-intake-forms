@@ -1,6 +1,7 @@
+import asyncio
 import base64
+import json
 import os
-import pprint
 from datetime import datetime
 from textwrap import dedent
 
@@ -8,11 +9,11 @@ import logfire
 import polars as pl
 import structlog
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import AsyncOpenAI
 from pydantic import BaseModel
 
 
-def main():
+async def main():
     load_dotenv(override=True)
     log = structlog.get_logger()
 
@@ -21,49 +22,127 @@ def main():
     logfire.instrument_openai()
 
     image_paths = find_image_paths()
-    log.info("Found images to process", count=len(image_paths), image_paths=image_paths)
+    log.info("Found images to process", count=len(image_paths))
 
-    client = OpenAI()
-
-    template_csv_name = "outputs/output.template.csv"
     current_time = datetime.now().strftime("%Y%m%d_%H%M")
     output_csv_name = f"outputs/output_{current_time}.csv"
+    progress_file = f"outputs/progress_{current_time}.json"
+    
+    # Initialize progress tracking
+    processed_images = load_progress(progress_file)
+    remaining_images = [path for path in image_paths if path not in processed_images]
+    
+    log.info("Progress loaded", 
+             total_images=len(image_paths),
+             already_processed=len(processed_images),
+             remaining=len(remaining_images))
 
-    df = pl.read_csv(template_csv_name)
+    if not remaining_images:
+        log.info("All images already processed!")
+        return
 
-    for image_path in image_paths:
-        log.info("Processing image", image_path=image_path)
-        with logfire.span('Processing intake form image', image_path=image_path):
-            intake_forms: IntakeForms = process_image(client, image_path)
-            logfire.info("Received result", result=intake_forms.model_dump())
-        log.info("Received result", result=pprint.pformat(intake_forms.model_dump()))
-        for intake_form in intake_forms.list_of_intake_forms:
-            df = df.vstack(
-                pl.DataFrame(
-                    {
-                        "id_number": [intake_form.id_number],
-                        "species": [intake_form.species],
-                        "condition": [intake_form.condition],
-                        "intake_date": [intake_form.intake_date],
-                        # Making these wrap in one cell, separated by spaces and not newlines, to meet requirements
-                        "rescuer_name": [
-                            f"{intake_form.rescuer_name}                         {intake_form.rescuer_city}"
-                        ],
-                        "county_found": [intake_form.county_found],
-                        "final_disposition": [intake_form.final_disposition],
-                        "county_released": [intake_form.county_released],
-                        "disposition_date": [intake_form.disposition_date],
-                    }
-                )
-            )
-        log.info("Appended to dataframe", df_length=len(df), image_path=image_path)
+    # Initialize CSV file with headers if it doesn't exist
+    initialize_csv(output_csv_name)
 
-    log.info("Finished processing images")
+    # Create async client and semaphore for rate limiting
+    client = AsyncOpenAI()
+    semaphore = asyncio.Semaphore(5)  # Limit to 5 concurrent requests
+    
+    # Process images concurrently
+    tasks = [
+        process_image_with_progress(
+            client, image_path, output_csv_name, progress_file, semaphore, log
+        )
+        for image_path in remaining_images
+    ]
+    
+    log.info("Starting concurrent processing", concurrent_limit=5)
+    
+    # Process all tasks and handle any exceptions
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    
+    # Count successes and failures
+    successes = sum(1 for r in results if not isinstance(r, Exception))
+    failures = sum(1 for r in results if isinstance(r, Exception))
+    
+    log.info("Processing completed", 
+             successes=successes, 
+             failures=failures,
+             output_file=output_csv_name)
 
-    log.info(
-        "Writing to output CSV", output_csv_name=output_csv_name, df_length=len(df)
-    )
-    df.write_csv(output_csv_name)
+
+def load_progress(progress_file):
+    """Load list of already processed images from progress file."""
+    if os.path.exists(progress_file):
+        with open(progress_file, 'r') as f:
+            return set(json.load(f))
+    return set()
+
+
+def save_progress(progress_file, processed_image):
+    """Add a processed image to the progress file."""
+    processed_images = load_progress(progress_file)
+    processed_images.add(processed_image)
+    
+    with open(progress_file, 'w') as f:
+        json.dump(list(processed_images), f)
+
+
+def initialize_csv(output_csv_name):
+    """Initialize CSV file with headers if it doesn't exist."""
+    if not os.path.exists(output_csv_name):
+        template_csv = "outputs/output.template.csv"
+        df_template = pl.read_csv(template_csv)
+        df_template.write_csv(output_csv_name)
+
+
+def append_to_csv(output_csv_name, intake_forms):
+    """Append intake forms to CSV file."""
+    rows = []
+    for intake_form in intake_forms.list_of_intake_forms:
+        rows.append({
+            "id_number": intake_form.id_number,
+            "species": intake_form.species,
+            "condition": intake_form.condition,
+            "intake_date": intake_form.intake_date,
+            "rescuer_name": f"{intake_form.rescuer_name}                         {intake_form.rescuer_city}",
+            "county_found": intake_form.county_found,
+            "final_disposition": intake_form.final_disposition,
+            "county_released": intake_form.county_released,
+            "disposition_date": intake_form.disposition_date,
+        })
+    
+    if rows:
+        df_new = pl.DataFrame(rows)
+        
+        # Read existing CSV and append new data
+        df_existing = pl.read_csv(output_csv_name)
+        df_combined = df_existing.vstack(df_new)
+        df_combined.write_csv(output_csv_name)
+
+
+async def process_image_with_progress(client, image_path, output_csv_name, progress_file, semaphore, log):
+    """Process a single image with progress tracking and immediate CSV writing."""
+    async with semaphore:  # Limit concurrent requests
+        try:
+            log.info("Processing image", image_path=image_path)
+            
+            with logfire.span('Processing intake form image', image_path=image_path):
+                intake_forms = await process_image_async(client, image_path)
+                logfire.info("Received result", result=intake_forms.model_dump())
+            
+            # Immediately append to CSV
+            append_to_csv(output_csv_name, intake_forms)
+            
+            # Save progress
+            save_progress(progress_file, image_path)
+            
+            log.info("Completed processing image", image_path=image_path)
+            return True
+            
+        except Exception as e:
+            log.error("Failed to process image", image_path=image_path, error=str(e))
+            return False
 
 
 def find_image_paths():
@@ -106,8 +185,8 @@ class IntakeForms(BaseModel):
     list_of_intake_forms: list[IntakeForm]
 
 
-def process_image(
-    client: OpenAI,
+async def process_image_async(
+    client: AsyncOpenAI,
     image_path: str,
 ) -> IntakeForms:
     model = os.getenv("OPENAI_MODEL")
@@ -165,7 +244,7 @@ def process_image(
         """
     )
 
-    response = client.responses.parse(
+    response = await client.responses.parse(
         model=model,
         input=[
             {
@@ -193,4 +272,4 @@ def process_image(
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
