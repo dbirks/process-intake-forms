@@ -165,17 +165,12 @@ def process_image(
         """
     )
 
-    completion = client.beta.chat.completions.parse(
+    response = client.responses.parse(
         model=model,
-        messages=[
+        input=[
             {
                 "role": "system",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": system_prompt,
-                    }
-                ],
+                "content": system_prompt,
             },
             {
                 "role": "user",
@@ -191,10 +186,10 @@ def process_image(
                 ],
             },
         ],
-        response_format=IntakeForms,
+        text_format=IntakeForms,
     )
 
-    return completion.choices[0].message.parsed
+    return response.output_parsed
 
 
 if __name__ == "__main__":
